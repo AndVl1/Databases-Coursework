@@ -1,22 +1,22 @@
 package storage
 
 import (
+	"context"
 	"log"
 
-	config "github.com/AndVl1/bugTrackerBackend/config"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/AndVl1/bugTrackerBackend/config"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-var DB *gorm.DB
+var DB *pgxpool.Pool
 
-func NewDB(params ...string) *gorm.DB {
+func NewDB(params ...string) *pgxpool.Pool {
 	var err error
 	conString := config.GetPostgresConnectionString()
 
 	log.Print(conString)
 
-	DB, err = gorm.Open(config.GetDBType(), conString)
+	DB, err = pgxpool.Connect(context.Background(), conString)
 
 	if err != nil {
 		log.Panic(err)
@@ -25,6 +25,6 @@ func NewDB(params ...string) *gorm.DB {
 	return DB
 }
 
-func GetDBInstance() *gorm.DB {
+func GetDBInstance() *pgxpool.Pool {
 	return DB
 }

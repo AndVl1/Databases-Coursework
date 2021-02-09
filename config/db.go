@@ -1,15 +1,27 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
-const (
-	DBUser     = "bugtrack"
-	DBPassword = "bugtrack_pass"
-	DBName     = "bugtrackcourse"
-	DBHost     = "0.0.0.0"
-	DBPort     = "5432"
+var (
+	DBUser     = os.Getenv("DBUser")
+	DBPassword = os.Getenv("DBPassword")
+	DBName     = os.Getenv("DBName")
+	DBHost     = os.Getenv("DBHost")
+	DBPort     = os.Getenv("DBPort")
 	DBType     = "postgres"
 )
+
+//var (
+//	DBUser     = "bugtrack"
+//	DBPassword = "bugtrack_pass"
+//	DBName     = "bugtrackcourse"
+//	DBHost     = "0.0.0.0"
+//	DBPort     = "5432"
+//	DBType     = "postgres"
+//)
 
 func GetDBType() string {
 	return DBType
