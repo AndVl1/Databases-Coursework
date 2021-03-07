@@ -115,7 +115,7 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel1(in *jlexer.Lex
 		}
 		switch key {
 		case "userId":
-			out.Id = int(in.Int())
+			out.Id = uint64(in.Uint64())
 		case "login":
 			out.Login = string(in.String())
 		case "password":
@@ -139,7 +139,7 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel1(out *jwriter.W
 	{
 		const prefix string = ",\"userId\":"
 		out.RawString(prefix[1:])
-		out.Int(int(in.Id))
+		out.Uint64(uint64(in.Id))
 	}
 	{
 		const prefix string = ",\"login\":"

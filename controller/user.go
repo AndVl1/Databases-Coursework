@@ -40,14 +40,14 @@ func GetUser(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, json)
 }
 
-func AddUser(ctx echo.Context) error {
-	userJson := ctx.FormValue("user")
-	log.Print(userJson)
-	user := &model.User{}
-	_ = user.UnmarshalJSON([]byte(userJson))
-	_ = insertUser(user)
-	return ctx.String(http.StatusOK, "OK")
-}
+//func AddUser(ctx echo.Context) error {
+//	userJson := ctx.FormValue("user")
+//	log.Print(userJson)
+//	user := &model.User{}
+//	_ = user.UnmarshalJSON([]byte(userJson))
+//	_, _ = insertUser(user)
+//	return ctx.String(http.StatusOK, "OK")
+//}
 
 func CheckUser(ctx echo.Context) error {
 	emailJson := ctx.FormValue("email")
@@ -56,10 +56,11 @@ func CheckUser(ctx echo.Context) error {
 		log.Println(err)
 		return err
 	}
-	var response = struct {
-		Response bool
-	}{Response: registered}
-	return ctx.JSON(http.StatusOK, response)
+	if registered {
+		return ctx.JSON(http.StatusBadRequest, "")
+	} else {
+		return ctx.JSON(http.StatusOK, "")
+	}
 }
 
 func RegisterUser(ctx echo.Context) error {
@@ -70,13 +71,14 @@ func RegisterUser(ctx echo.Context) error {
 		Name:     ctx.FormValue("name"),
 	}
 	log.Println(user.Login)
-	err := insertUser(user)
+	id, err := insertUser(user)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
+	user.Id = id
 	var userJson, _ = user.MarshalJSON()
-	return ctx.String(http.StatusOK, string(userJson))
+	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, userJson)
 }
 
 func login(login string, password string) (*model.User, error) {
@@ -97,12 +99,12 @@ func login(login string, password string) (*model.User, error) {
 	}
 }
 
-func insertUser(user *model.User) error {
+func insertUser(user *model.User) (uint64, error) {
 	pool := storage.GetDBInstance()
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
 		log.Printf("Unable to acquire a database connection: %v\n", err)
-		return err
+		return 0, err
 	}
 	defer conn.Release()
 	log.Print(user)
@@ -113,9 +115,9 @@ func insertUser(user *model.User) error {
 	err = row.Scan(&id)
 	if err != nil {
 		log.Printf("Unable to INSERT: %v\n", err)
-		return err
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
 func checkRegisteredUser(login string) (bool, error) {

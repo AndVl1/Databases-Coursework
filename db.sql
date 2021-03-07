@@ -26,7 +26,8 @@ CREATE TABLE "User"
     password text      NOT NULL,
     name     text      NOT NULL,
     CONSTRAINT pk_User PRIMARY KEY (userId),
-    UNIQUE (login)
+    UNIQUE (login),
+    UNIQUE (name)
 );
 
 CREATE TABLE Bug
