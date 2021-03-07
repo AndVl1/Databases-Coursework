@@ -25,13 +25,9 @@ CREATE TABLE "User"
     login    text      NOT NULL,
     password text      NOT NULL,
     name     text      NOT NULL,
-    -- in 'Admin', 'PM', 'Developer', 'User'
-    role     role_enum NOT NULL,
-    CONSTRAINT pk_User PRIMARY KEY (userId)
+    CONSTRAINT pk_User PRIMARY KEY (userId),
+    UNIQUE (login)
 );
-
-INSERT INTO "User" (login, password, name, role)
-VALUES ('abc', 'anc', 'anc', 'PM');
 
 CREATE TABLE Bug
 (

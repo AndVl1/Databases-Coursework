@@ -122,8 +122,6 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel1(in *jlexer.Lex
 			out.Password = string(in.String())
 		case "name":
 			out.Name = string(in.String())
-		case "role":
-			out.Role = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -157,11 +155,6 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel1(out *jwriter.W
 		const prefix string = ",\"name\":"
 		out.RawString(prefix)
 		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"role\":"
-		out.RawString(prefix)
-		out.String(string(in.Role))
 	}
 	out.RawByte('}')
 }

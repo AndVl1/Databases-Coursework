@@ -6,7 +6,6 @@ type User struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 	Name     string `json:"name"`
-	Role     string `json:"role"`
 }
 
 //easyjson:json
