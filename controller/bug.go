@@ -32,13 +32,13 @@ func GetBug(ctx echo.Context) error {
 func AddBug(ctx echo.Context) error {
 	bugJson := ctx.Param("bug")
 	log.Print(bugJson)
-	bug := &model.Bug{}
+	bug := &model.Issue{}
 	_ = bug.UnmarshalJSON([]byte(bugJson))
 	_ = insertBug(bug)
 	return ctx.String(http.StatusOK, "OK")
 }
 
-func insertBug(bug *model.Bug) error {
+func insertBug(bug *model.Issue) error {
 	pool := storage.GetDBInstance()
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
@@ -48,7 +48,7 @@ func insertBug(bug *model.Bug) error {
 	defer conn.Release()
 	log.Print(bug)
 	row := conn.QueryRow(context.Background(),
-		"INSERT INTO Bug (name, description, status, authorId) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO Issue (name, description, status, authorId) VALUES ($1, $2, $3, $4) RETURNING id",
 		bug.Name, bug.Description, bug.Status, bug.AuthorId)
 	var id uint64
 	err = row.Scan(&id)
@@ -59,33 +59,33 @@ func insertBug(bug *model.Bug) error {
 	return nil
 }
 
-func getRepoBug(id string) (model.Bug, error) {
+func getRepoBug(id string) (model.Issue, error) {
 	pool := storage.GetDBInstance()
-	var bug model.Bug
+	var bug model.Issue
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
 		log.Printf("Unable to acquire a database connection: %v\n", err)
-		return model.Bug{}, err
+		return model.Issue{}, err
 	}
 	defer conn.Release()
-	row := conn.QueryRow(context.Background(), "SELECT * FROM Bug WHERE bugId=$1", id)
+	row := conn.QueryRow(context.Background(), "SELECT * FROM Issue WHERE bugId=$1", id)
 	_ = row.Scan(&bug.Id, &bug.Name, &bug.Description, &bug.Status, &bug.AuthorId)
 
 	return bug, nil
 }
 
-func getRepoBugs() (model.Bugs, error) {
+func getRepoBugs() (model.Issues, error) {
 	pool := storage.GetDBInstance()
-	var bugs model.Bugs
+	var bugs model.Issues
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
 		log.Printf("Unable to acquire a database connection: %v\n", err)
 		return nil, err
 	}
 	defer conn.Release()
-	rows, _ := conn.Query(context.Background(), `SELECT * FROM Bugs`)
+	rows, _ := conn.Query(context.Background(), `SELECT * FROM Issues`)
 	for rows.Next() {
-		var bug model.Bug
+		var bug model.Issue
 		_ = rows.Scan(&bug.Id, &bug.Name, &bug.Description, &bug.Status)
 		log.Println(bug.Name)
 		bugs = append(bugs, &bug)

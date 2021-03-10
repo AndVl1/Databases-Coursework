@@ -30,89 +30,49 @@ CREATE TABLE "User"
     UNIQUE (name)
 );
 
-CREATE TABLE Bug
+CREATE TABLE Project
 (
-    bugId              serial      NOT NULL,
-    name               text        NOT NULL,
-    description        text        NOT NULL,
+    projectId           serial  NOT NULL ,
+    projectName         text    NOT NULL ,
+    projectDescription  text    NULL ,
+    CONSTRAINT pk_Project PRIMARY KEY (projectId)
+);
+
+CREATE TABLE ProjectUser
+(
+    userId      int NOT NULL,
+    projectId   int NOT NULL,
+    CONSTRAINT  pk_ProjectUser  PRIMARY KEY (userId, projectId),
+    CONSTRAINT  fk_Project      FOREIGN KEY (projectId) REFERENCES Project (projectId),
+    CONSTRAINT  fk_User         FOREIGN KEY (userId)    REFERENCES "User" (userId)
+
+);
+
+CREATE TABLE Issue
+(
+    issueId             serial      NOT NULL,
+    name                text        NOT NULL,
+    groupIssueNumber    int         NOT NULL,
+    description         text        NOT NULL,
     -- in 'new', 'in progress', 'review', 'testing', 'ready', 'closed'
-    status             status_enum NOT NULL,
-    authorId           int         NOT NULL,
-    attachmentId       int         NOT NULL,
-    commentId          int         NOT NULL,
-    givenToDeveloperId int         NOT NULL,
-    CONSTRAINT pk_Bug PRIMARY KEY (
-                                   bugId
-        )
+    status              status_enum NOT NULL,
+    releaseVersion      int         NOT NULL,
+    creationDate        date        NOT NULL,
+    deadline            date        NOT NULL,
+    assigneeId          int         NOT NULL,
+    authorId            int         NOT NULL,
+    projectId           int         NOT NULL,
+    CONSTRAINT pk_Bug       PRIMARY KEY (issueId),
+    CONSTRAINT fk_Project   FOREIGN KEY (projectId)     REFERENCES Project (projectId),
+    CONSTRAINT fk_Author    FOREIGN KEY (authorId)      REFERENCES ProjectUser (userId),
+    CONSTRAINT fk_Developer FOREIGN KEY (assigneeId)    REFERENCES ProjectUser (userId)
 );
 
-CREATE TABLE Label
-(
-    labelId   serial     NOT NULL,
-    -- 'DB', 'Interface', 'Docs'
-    labelName label_enum NOT NULL,
-    CONSTRAINT pk_Label PRIMARY KEY (
-                                     labelId
-        )
-);
-
-CREATE TABLE Comment
-(
-    commentId      serial NOT NULL,
-    text           text   NOT NULL,
-    authorId       int    NOT NULL,
-    attachmentId   int    NOT NULL,
-    CONSTRAINT pk_Comment PRIMARY KEY (commentId)
-);
-
-CREATE TABLE Attachment
-(
-    attachmentId   serial NOT NULL,
-    authorId       int    NOT NULL,
-    attachmentPath text   NOT NULL,
-    CONSTRAINT pk_Attachment PRIMARY KEY (attachmentId)
-);
-
-CREATE TABLE Bug_Label_Intersection
-(
-    bugId   int NOT NULL,
-    labelId int NOT NULL,
-    CONSTRAINT pk_Bug_Label_Intersection PRIMARY KEY (bugId, labelId)
-);
-
-ALTER TABLE Bug
-    ADD CONSTRAINT fk_Bug_AuthorId FOREIGN KEY (authorId)
-        REFERENCES "User" (userId);
-
-ALTER TABLE Bug
-    ADD CONSTRAINT fk_Bug_AttachmentId FOREIGN KEY (attachmentId)
-        REFERENCES Attachment (attachmentId);
-
-ALTER TABLE Bug
-    ADD CONSTRAINT fk_Bug_CommentId FOREIGN KEY (commentId)
-        REFERENCES Comment (commentId);
-
-ALTER TABLE Bug
-    ADD CONSTRAINT fk_Bug_GivenToDeveloperId FOREIGN KEY (givenToDeveloperId)
-        REFERENCES "User" (userId);
-
-ALTER TABLE Comment
-    ADD CONSTRAINT fk_Comment_AuthorId FOREIGN KEY (authorId)
-        REFERENCES "User" (userId);
-
-ALTER TABLE Comment
-    ADD CONSTRAINT fk_Comment_AttachmentId FOREIGN KEY (attachmentId)
-        REFERENCES Attachment (attachmentId);
-
-ALTER TABLE Attachment
-    ADD CONSTRAINT fk_Attachment_AuthorId FOREIGN KEY (authorId)
-        REFERENCES "User" (userId);
-
-ALTER TABLE Bug_Label_Intersection
-    ADD CONSTRAINT fk_Bug_Label_Intersection_BugId FOREIGN KEY (bugId)
-        REFERENCES Bug (bugId);
-
-ALTER TABLE Bug_Label_Intersection
-    ADD CONSTRAINT fk_Bug_Label_Intersection_LabelId FOREIGN KEY (labelId)
-        REFERENCES Label (labelId);
-
+-- CREATE OR REPLACE FUNCTION createExampleProject() RETURNS TRIGGER AS $ExampleProject$
+--     BEGIN
+--         INSERT INTO Project
+--     end;
+--     $ExampleProject$ LANGUAGE plpgsql;
+--
+-- CREATE TRIGGER ExampleProject AFTER INSERT ON "User"
+--     FOR EACH ROW EXECUTE PROCEDURE createExampleProject();

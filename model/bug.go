@@ -1,7 +1,7 @@
 package model
 
 //easyjson:json
-type Bug struct {
+type Issue struct {
 	Id          int    `json:"bugId"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -10,4 +10,4 @@ type Bug struct {
 }
 
 //easyjson:json
-type Bugs []*Bug
+type Issues []*Issue
