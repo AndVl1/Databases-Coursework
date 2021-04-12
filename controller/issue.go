@@ -9,8 +9,8 @@ import (
 	"net/http"
 )
 
-func GetAllBugs(ctx echo.Context) error {
-	bugs, _ := getRepoBugs()
+func GetAllIssues(ctx echo.Context) error {
+	bugs, _ := getRepoIssues()
 	//if err != nil {
 	//	return err
 	//} TODO
@@ -19,9 +19,9 @@ func GetAllBugs(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, json)
 }
 
-func GetBug(ctx echo.Context) error {
+func GetIssue(ctx echo.Context) error {
 	id := ctx.Param("id")
-	bug, _ := getRepoBug(id)
+	bug, _ := getRepoIssue(id)
 	//if err != nil {
 	//	return err
 	//}
@@ -29,16 +29,16 @@ func GetBug(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, json)
 }
 
-func AddBug(ctx echo.Context) error {
-	bugJson := ctx.Param("bug")
+func AddIssue(ctx echo.Context) error {
+	bugJson := ctx.Param("issue")
 	log.Print(bugJson)
-	bug := &model.Issue{}
-	_ = bug.UnmarshalJSON([]byte(bugJson))
-	_ = insertBug(bug)
+	issue := &model.Issue{}
+	_ = issue.UnmarshalJSON([]byte(bugJson))
+	_ = insertIssue(issue)
 	return ctx.String(http.StatusOK, "OK")
 }
 
-func insertBug(bug *model.Issue) error {
+func insertIssue(bug *model.Issue) error {
 	pool := storage.GetDBInstance()
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
@@ -59,7 +59,7 @@ func insertBug(bug *model.Issue) error {
 	return nil
 }
 
-func getRepoBug(id string) (model.Issue, error) {
+func getRepoIssue(id string) (model.Issue, error) {
 	pool := storage.GetDBInstance()
 	var bug model.Issue
 	conn, err := pool.Acquire(context.Background())
@@ -74,7 +74,7 @@ func getRepoBug(id string) (model.Issue, error) {
 	return bug, nil
 }
 
-func getRepoBugs() (model.Issues, error) {
+func getRepoIssues() (model.Issues, error) {
 	pool := storage.GetDBInstance()
 	var bugs model.Issues
 	conn, err := pool.Acquire(context.Background())

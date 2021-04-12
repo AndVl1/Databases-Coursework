@@ -28,10 +28,12 @@ func main() {
 	//e.GET("/students", controller.GetStudents)
 	e.GET("/users", controller.GetAllUsers)
 	e.GET("/users/:id", controller.GetUser)
+	e.GET("/projects", controller.GetProjectsForUser)
 	// POST
 	e.POST("/login", controller.LoginUser)
 	e.POST("/check", controller.CheckUser)
 	e.POST("/register", controller.RegisterUser)
+	e.POST("/projects/add", controller.AddProject)
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {

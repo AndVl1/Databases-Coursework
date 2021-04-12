@@ -35,6 +35,7 @@ CREATE TABLE Project
     projectId           serial  NOT NULL ,
     projectName         text    NOT NULL ,
     projectDescription  text    NULL ,
+    issueCount          int     NOT NULL DEFAULT 0 ,
     CONSTRAINT pk_Project PRIMARY KEY (projectId)
 );
 
@@ -48,14 +49,22 @@ CREATE TABLE ProjectUser
 
 );
 
+CREATE VIEW ProjectUsersView AS
+    SELECT U.userId, P.projectId, P.projectName, P.projectDescription FROM "User" as U
+        LEFT JOIN ProjectUser PU on U.userId = PU.userId
+        LEFT JOIN Project P on PU.projectId = P.projectId;
+
+SELECT projectId, projectName, projectDescription FROM ProjectUsersView;
+
+-- CREATE INDEX IX_ProjectUser ON ProjectUsersView(userId);
+
 CREATE TABLE Issue
 (
     issueId             serial      NOT NULL,
     name                text        NOT NULL,
-    groupIssueNumber    int         NOT NULL,
+    projectIssueNumber  int         NOT NULL,
     description         text        NOT NULL,
     -- in 'new', 'in progress', 'review', 'testing', 'ready', 'closed'
-    status              status_enum NOT NULL,
     releaseVersion      int         NOT NULL,
     creationDate        date        NOT NULL,
     deadline            date        NOT NULL,
@@ -68,6 +77,15 @@ CREATE TABLE Issue
     CONSTRAINT fk_Developer FOREIGN KEY (assigneeId)    REFERENCES ProjectUser (userId)
 );
 
+CREATE TABLE IssueRecursive
+(
+    issueId         int     NOT NULL ,
+    containsIssueId int     NOT NULL ,
+    CONSTRAINT pk_IssueRecursive    PRIMARY KEY (issueId, containsIssueId),
+    CONSTRAINT fk_Issue     FOREIGN KEY (issueId)           REFERENCES Issue(issueId),
+    CONSTRAINT fk_IssueRec  FOREIGN KEY (containsIssueId)   REFERENCES Issue(issueId)
+);
+
 -- CREATE OR REPLACE FUNCTION createExampleProject() RETURNS TRIGGER AS $ExampleProject$
 --     BEGIN
 --         INSERT INTO Project
@@ -76,3 +94,28 @@ CREATE TABLE Issue
 --
 -- CREATE TRIGGER ExampleProject AFTER INSERT ON "User"
 --     FOR EACH ROW EXECUTE PROCEDURE createExampleProject();
+
+CREATE TABLE Attachment
+(
+    attachmentId    serial  NOT NULL ,
+    fileName        text    NOT NULL ,
+    fileType        text    NOT NULL ,
+    postDate        date    NOT NULL ,
+    attachmentPath  text    NOT NULL ,
+    issueId         int     NOT NULL ,
+    authorId        int     NOT NULL ,
+    CONSTRAINT pk_Attachment    PRIMARY KEY (attachmentId),
+    CONSTRAINT fk_Issue     FOREIGN KEY (issueId)   REFERENCES Issue(issueId),
+    CONSTRAINT fk_User      FOREIGN KEY (authorId)  REFERENCES "User"(userId)
+);
+
+CREATE TABLE Comment
+(
+    commentId   serial  NOT NULL ,
+    commentText serial  NOT NULL ,
+    commentDate serial  NOT NULL ,
+    authorId    int     NOT NULL ,
+    issueId     int     NOT NULL ,
+    CONSTRAINT fk_Issue     FOREIGN KEY (issueId)   REFERENCES Issue(issueId),
+    CONSTRAINT fk_User      FOREIGN KEY (authorId)  REFERENCES "User"(userId)
+)
