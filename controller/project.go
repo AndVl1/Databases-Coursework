@@ -11,8 +11,8 @@ import (
 
 func GetProjectsForUser(ctx echo.Context) error {
 	projects, _ := getProjectsForUserRepo(ctx.FormValue("userId"))
-
 	json, _ := projects.MarshalJSON()
+	log.Println(string(json))
 	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, json)
 }
 
@@ -54,6 +54,7 @@ func insertProject(userId string, project *model.Project) (uint64, error) {
 		context.Background(),
 		"INSERT INTO ProjectUser(projectId, userId) VALUES ($1, $2)",
 		project.Id, userId)
+	log.Println("Insert project")
 	if err != nil {
 		log.Printf("Unable to INSERT: %v\n", err)
 		return 0, err
@@ -70,11 +71,16 @@ func getProjectsForUserRepo(userId string) (model.Projects, error) {
 		return nil, err
 	}
 	defer conn.Release()
-	rows, _ := conn.Query(context.Background(), `SELECT projectId, projectName, projectDescription FROM ProjectUsersView WHERE userId=$1`, userId)
+	rows, _ := conn.Query(context.Background(), "SELECT projectId, projectName, projectDescription, issueCount "+
+		"FROM ProjectUsersView WHERE userId=$1", userId)
+
 	for rows.Next() {
 		var project model.Project
-		_ = rows.Scan(&project.Id, &project.ProjectName, &project.ProjectDescription)
-		projects = append(projects, &project)
+		_ = rows.Scan(&project.Id, &project.ProjectName, &project.ProjectDescription, &project.IssuesCount)
+		log.Println(project.ProjectName)
+		if project.Id > 0 {
+			projects = append(projects, &project)
+		}
 	}
 
 	return projects, nil

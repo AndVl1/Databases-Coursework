@@ -25,15 +25,20 @@ func main() {
 	// Routes
 	// GET
 	e.GET("/", hello)
-	//e.GET("/students", controller.GetStudents)
+
 	e.GET("/users", controller.GetAllUsers)
 	e.GET("/users/:id", controller.GetUser)
 	e.GET("/projects", controller.GetProjectsForUser)
+	e.GET("/issues/:assignee", controller.GetIssuesForAssignee)
+	e.GET("/projects/:id/issues", controller.GetIssuesForProject)
+	e.GET("/issues/:id/comments", controller.GetComments)
 	// POST
 	e.POST("/login", controller.LoginUser)
 	e.POST("/check", controller.CheckUser)
 	e.POST("/register", controller.RegisterUser)
 	e.POST("/projects/add", controller.AddProject)
+	e.POST("/projects/:id/issues/add", controller.AddIssue)
+	e.POST("/issues/:id/comments/add", controller.AddComment)
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
@@ -45,5 +50,5 @@ func main() {
 
 // Handler
 func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
+	return c.String(http.StatusOK, "https://github.com/AndVl1/BugTracker-android")
 }

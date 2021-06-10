@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func GetAllIssues(ctx echo.Context) error {
@@ -19,8 +20,24 @@ func GetAllIssues(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, json)
 }
 
+func GetIssuesForAssignee(ctx echo.Context) error {
+	userId := ctx.Param("assignee")
+	issues, _ := getRepoIssuesForAssignee(userId)
+	json, _ := issues.MarshalJSON()
+
+	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, json)
+}
+
+func GetIssuesForProject(ctx echo.Context) error {
+	projectId := ctx.Param("id")
+	issues, _ := getRepoIssuesForProject(projectId)
+	json, _ := issues.MarshalJSON()
+
+	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, json)
+}
+
 func GetIssue(ctx echo.Context) error {
-	id := ctx.Param("id")
+	id := ctx.FormValue("id")
 	bug, _ := getRepoIssue(id)
 	//if err != nil {
 	//	return err
@@ -30,15 +47,24 @@ func GetIssue(ctx echo.Context) error {
 }
 
 func AddIssue(ctx echo.Context) error {
-	bugJson := ctx.Param("issue")
-	log.Print(bugJson)
+	projectId := ctx.Param("id")
+	issueJson := ctx.QueryParam("issue")
+	statusId, _ := strconv.Atoi(ctx.QueryParam("statusId"))
+	log.Printf("%s %s", projectId, issueJson)
 	issue := &model.Issue{}
-	_ = issue.UnmarshalJSON([]byte(bugJson))
-	_ = insertIssue(issue)
+	if err := issue.UnmarshalJSON([]byte(issueJson)); err != nil {
+		return ctx.String(http.StatusNotImplemented, err.Error())
+	}
+	log.Printf("Status id %d", issue.StatusId)
+	issue.StatusId = statusId
+	log.Println(issue)
+	if err := insertIssue(issue, projectId); err != nil {
+		return ctx.String(http.StatusNotImplemented, err.Error())
+	}
 	return ctx.String(http.StatusOK, "OK")
 }
 
-func insertIssue(bug *model.Issue) error {
+func insertIssue(issue *model.Issue, projectId string) error {
 	pool := storage.GetDBInstance()
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
@@ -46,17 +72,117 @@ func insertIssue(bug *model.Issue) error {
 		return err
 	}
 	defer conn.Release()
-	log.Print(bug)
+	projectRow := conn.QueryRow(context.Background(), "SELECT issuesCount FROM Project WHERE projectId=$1", projectId)
+	var issuesCount int
+	_ = projectRow.Scan(issuesCount)
+	issuesCount++
 	row := conn.QueryRow(context.Background(),
-		"INSERT INTO Issue (name, description, status, authorId) VALUES ($1, $2, $3, $4) RETURNING id",
-		bug.Name, bug.Description, bug.Status, bug.AuthorId)
-	var id uint64
+		"INSERT INTO Issue ("+
+			"name, description, statusId, authorId, projectIssueNumber, "+
+			"labelId, releaseVersion, creationDate, deadline,"+
+			"projectId"+
+			") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING issueId",
+		issue.Name, issue.Description, issue.StatusId, issue.AuthorId,
+		issuesCount, issue.LabelId, issue.ReleaseVersion, issue.CreationDate,
+		issue.Deadline, issue.ProjectId)
+	var id int
 	err = row.Scan(&id)
+	issue.Id = id
+	if err != nil {
+		log.Printf("Unable to INSERT: %v\n", err)
+		return err
+	}
+	row = conn.QueryRow(context.Background(),
+		"UPDATE Project SET issueCount=$1 WHERE projectId=$2",
+		issuesCount,
+		projectId)
+	err = row.Scan()
 	if err != nil {
 		log.Printf("Unable to INSERT: %v\n", err)
 		return err
 	}
 	return nil
+}
+
+/*
+   issueId             serial      NOT NULL,
+   name                text        NOT NULL,
+   projectIssueNumber  int         NOT NULL,
+   description         text        NOT NULL,
+   releaseVersion      int         NOT NULL,
+   creationDate        date        NOT NULL,
+   deadline            date        NOT NULL,
+   assigneeId          int         NOT NULL,
+   authorId            int         NOT NULL,
+   projectId           int         NOT NULL,
+   statusId            int         NOT NULL,
+   -- in 'new', 'in progress', 'review', 'testing', 'ready', 'closed'
+   labelId             int         NOT NULL,
+*/
+
+func getRepoIssuesForProject(projectId string) (model.Issues, error) {
+	pool := storage.GetDBInstance()
+	var issues model.Issues
+	conn, err := pool.Acquire(context.Background())
+	if err != nil {
+		log.Printf("Unable to acquire a database connection: %v\n", err)
+		return nil, err
+	}
+	defer conn.Release()
+	rows, _ := conn.Query(context.Background(), "SELECT issueId,"+
+		"name, projectIssueNumber, description, releaseVersion, creationDate, deadline,"+
+		"assigneeId, authorId, projectId, statusId, labelId FROM Issue WHERE projectId=$1", projectId)
+	for rows.Next() {
+		var issue model.Issue
+		_ = rows.Scan(
+			&issue.Id,
+			&issue.Name,
+			&issue.ProjectIssueNumber,
+			&issue.Description,
+			&issue.ReleaseVersion,
+			&issue.CreationDate,
+			&issue.Deadline,
+			&issue.AssigneeId,
+			&issue.AuthorId,
+			&issue.ProjectId,
+			&issue.StatusId,
+			&issue.LabelId)
+		issues = append(issues, &issue)
+	}
+	return issues, nil
+}
+
+func getRepoIssuesForAssignee(userId string) (model.Issues, error) {
+	pool := storage.GetDBInstance()
+	var issues model.Issues
+	conn, err := pool.Acquire(context.Background())
+	if err != nil {
+		log.Printf("Unable to acquire a database connection: %v\n", err)
+		return nil, err
+	}
+	defer conn.Release()
+	rows, _ := conn.Query(context.Background(), "SELECT issueId,"+
+		"name, projectIssueNumber, description, releaseVersion, creationDate, deadline,"+
+		"assigneeId, authorId, projectId, statusId, labelId FROM Issue "+
+		"WHERE assigneeId=$1", userId)
+	for rows.Next() {
+		var issue model.Issue
+		_ = rows.Scan(
+			&issue.Id,
+			&issue.Name,
+			&issue.ProjectIssueNumber,
+			&issue.Description,
+			&issue.ReleaseVersion,
+			&issue.CreationDate,
+			&issue.Deadline,
+			&issue.AssigneeId,
+			&issue.AuthorId,
+			&issue.ProjectId,
+			&issue.StatusId,
+			&issue.LabelId)
+		issues = append(issues, &issue)
+	}
+	return issues, nil
 }
 
 func getRepoIssue(id string) (model.Issue, error) {
@@ -69,7 +195,7 @@ func getRepoIssue(id string) (model.Issue, error) {
 	}
 	defer conn.Release()
 	row := conn.QueryRow(context.Background(), "SELECT * FROM Issue WHERE bugId=$1", id)
-	_ = row.Scan(&bug.Id, &bug.Name, &bug.Description, &bug.Status, &bug.AuthorId)
+	_ = row.Scan(&bug.Id, &bug.Name, &bug.Description, &bug.StatusId, &bug.AuthorId)
 
 	return bug, nil
 }
@@ -86,7 +212,7 @@ func getRepoIssues() (model.Issues, error) {
 	rows, _ := conn.Query(context.Background(), `SELECT * FROM Issues`)
 	for rows.Next() {
 		var bug model.Issue
-		_ = rows.Scan(&bug.Id, &bug.Name, &bug.Description, &bug.Status)
+		_ = rows.Scan(&bug.Id, &bug.Name, &bug.Description, &bug.StatusId)
 		log.Println(bug.Name)
 		bugs = append(bugs, &bug)
 	}

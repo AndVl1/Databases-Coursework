@@ -1,17 +1,4 @@
 \c bugtrackcourse;
---
--- CREATE TABLE students
--- (
---     id bigint NOT NULL,
---     name text COLLATE pg_catalog."default",
---     CONSTRAINT student_pkey PRIMARY KEY (id)
---
--- );
---
--- INSERT INTO students(id, name) VALUES
--- (1, 'A'),
--- (2, 'B'),
--- (3, 'C');
 
 CREATE TYPE status_enum AS ENUM ('new', 'in progress', 'review', 'testing', 'ready', 'closed');
 
@@ -50,7 +37,7 @@ CREATE TABLE ProjectUser
 );
 
 CREATE VIEW ProjectUsersView AS
-    SELECT U.userId, P.projectId, P.projectName, P.projectDescription FROM "User" as U
+    SELECT U.userId, P.projectId, P.projectName, P.projectDescription, P.issueCount FROM "User" as U
         LEFT JOIN ProjectUser PU on U.userId = PU.userId
         LEFT JOIN Project P on PU.projectId = P.projectId;
 
@@ -58,23 +45,56 @@ SELECT projectId, projectName, projectDescription FROM ProjectUsersView;
 
 -- CREATE INDEX IX_ProjectUser ON ProjectUsersView(userId);
 
+CREATE TABLE Status
+(
+    statusId    serial      NOT NULL ,
+    statusName  status_enum NOT NULL ,
+    CONSTRAINT pk_Status PRIMARY KEY (statusId)
+);
+
+INSERT INTO Status (statusName) VALUES
+('new'),
+('in progress'),
+('review'),
+('testing'),
+('ready'),
+('closed');
+
+CREATE TABLE Label
+(
+    labelId     serial      NOT NULL ,
+    labelName   label_enum  NOT NULL ,
+    CONSTRAINT pk_Label PRIMARY KEY (labelId)
+);
+
+INSERT INTO Label (labelName) VALUES ('DB'),
+                                     ('Interface'),
+                                     ('Docs');
+
 CREATE TABLE Issue
 (
     issueId             serial      NOT NULL,
     name                text        NOT NULL,
     projectIssueNumber  int         NOT NULL,
     description         text        NOT NULL,
-    -- in 'new', 'in progress', 'review', 'testing', 'ready', 'closed'
-    releaseVersion      int         NOT NULL,
-    creationDate        date        NOT NULL,
-    deadline            date        NOT NULL,
-    assigneeId          int         NOT NULL,
+    releaseVersion      text        NOT NULL,
+    creationDate        bigint      NOT NULL,
+    deadline            bigint      NULL DEFAULT NULL,
+    assigneeId          int         NULL DEFAULT NULL,
     authorId            int         NOT NULL,
     projectId           int         NOT NULL,
+    statusId            int         NOT NULL,
+    -- in 'new', 'in progress', 'review', 'testing', 'ready', 'closed'
+    labelId             int         NOT NULL,
     CONSTRAINT pk_Bug       PRIMARY KEY (issueId),
     CONSTRAINT fk_Project   FOREIGN KEY (projectId)     REFERENCES Project (projectId),
-    CONSTRAINT fk_Author    FOREIGN KEY (authorId)      REFERENCES ProjectUser (userId),
-    CONSTRAINT fk_Developer FOREIGN KEY (assigneeId)    REFERENCES ProjectUser (userId)
+    CONSTRAINT fk_Author    FOREIGN KEY (authorId)      REFERENCES "User" (userId),
+    CONSTRAINT fk_Developer FOREIGN KEY (assigneeId)    REFERENCES "User" (userId),
+    -- wanted to constraint them to ProjectUser, but is didn't work
+    -- "there is no unique constraint matching given keys for referenced table "projectuser""
+    -- in ProjectUser must be unique combination, but not unique fields
+    CONSTRAINT fk_Status    FOREIGN KEY (statusId)      REFERENCES Status (statusId),
+    CONSTRAINT fk_Label     FOREIGN KEY (labelId)       REFERENCES Label (labelId)
 );
 
 CREATE TABLE IssueRecursive
@@ -85,15 +105,6 @@ CREATE TABLE IssueRecursive
     CONSTRAINT fk_Issue     FOREIGN KEY (issueId)           REFERENCES Issue(issueId),
     CONSTRAINT fk_IssueRec  FOREIGN KEY (containsIssueId)   REFERENCES Issue(issueId)
 );
-
--- CREATE OR REPLACE FUNCTION createExampleProject() RETURNS TRIGGER AS $ExampleProject$
---     BEGIN
---         INSERT INTO Project
---     end;
---     $ExampleProject$ LANGUAGE plpgsql;
---
--- CREATE TRIGGER ExampleProject AFTER INSERT ON "User"
---     FOR EACH ROW EXECUTE PROCEDURE createExampleProject();
 
 CREATE TABLE Attachment
 (
@@ -118,4 +129,9 @@ CREATE TABLE Comment
     issueId     int     NOT NULL ,
     CONSTRAINT fk_Issue     FOREIGN KEY (issueId)   REFERENCES Issue(issueId),
     CONSTRAINT fk_User      FOREIGN KEY (authorId)  REFERENCES "User"(userId)
-)
+);
+
+CREATE VIEW CommentView AS
+    SELECT C.commentId, C.commentText, C.commentDate, C.issueId, U.name, U.userId, U.login
+    FROM Comment as C
+        INNER JOIN "User" U on U.userId = C.authorId;

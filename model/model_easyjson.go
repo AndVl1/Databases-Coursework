@@ -587,6 +587,8 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel7(in *jlexer.Lex
 			out.ProjectName = string(in.String())
 		case "projectDescription":
 			out.ProjectDescription = string(in.String())
+		case "issuesCount":
+			out.IssuesCount = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -615,6 +617,11 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel7(out *jwriter.W
 		const prefix string = ",\"projectDescription\":"
 		out.RawString(prefix)
 		out.String(string(in.ProjectDescription))
+	}
+	{
+		const prefix string = ",\"issuesCount\":"
+		out.RawString(prefix)
+		out.Int(int(in.IssuesCount))
 	}
 	out.RawByte('}')
 }
@@ -1041,7 +1048,7 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel13(in *jlexer.Le
 			continue
 		}
 		switch key {
-		case "bugId":
+		case "issueId":
 			out.Id = int(in.Int())
 		case "name":
 			out.Name = string(in.String())
@@ -1049,10 +1056,22 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel13(in *jlexer.Le
 			out.ProjectIssueNumber = int(in.Int())
 		case "description":
 			out.Description = string(in.String())
-		case "status":
-			out.Status = string(in.String())
 		case "authorId":
 			out.AuthorId = int(in.Int())
+		case "assigneeId":
+			out.AssigneeId = int(in.Int())
+		case "releaseVersion":
+			out.ReleaseVersion = string(in.String())
+		case "creationDate":
+			out.CreationDate = int64(in.Int64())
+		case "deadline":
+			out.Deadline = int64(in.Int64())
+		case "projectId":
+			out.ProjectId = int(in.Int())
+		case "statusId":
+			out.StatusId = int(in.Int())
+		case "labelId":
+			out.LabelId = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -1068,7 +1087,7 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel13(out *jwriter.
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"bugId\":"
+		const prefix string = ",\"issueId\":"
 		out.RawString(prefix[1:])
 		out.Int(int(in.Id))
 	}
@@ -1088,14 +1107,44 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel13(out *jwriter.
 		out.String(string(in.Description))
 	}
 	{
-		const prefix string = ",\"status\":"
-		out.RawString(prefix)
-		out.String(string(in.Status))
-	}
-	{
 		const prefix string = ",\"authorId\":"
 		out.RawString(prefix)
 		out.Int(int(in.AuthorId))
+	}
+	{
+		const prefix string = ",\"assigneeId\":"
+		out.RawString(prefix)
+		out.Int(int(in.AssigneeId))
+	}
+	{
+		const prefix string = ",\"releaseVersion\":"
+		out.RawString(prefix)
+		out.String(string(in.ReleaseVersion))
+	}
+	{
+		const prefix string = ",\"creationDate\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.CreationDate))
+	}
+	{
+		const prefix string = ",\"deadline\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.Deadline))
+	}
+	{
+		const prefix string = ",\"projectId\":"
+		out.RawString(prefix)
+		out.Int(int(in.ProjectId))
+	}
+	{
+		const prefix string = ",\"statusId\":"
+		out.RawString(prefix)
+		out.Int(int(in.StatusId))
+	}
+	{
+		const prefix string = ",\"labelId\":"
+		out.RawString(prefix)
+		out.Int(int(in.LabelId))
 	}
 	out.RawByte('}')
 }
@@ -1123,7 +1172,7 @@ func (v *Issue) UnmarshalJSON(data []byte) error {
 func (v *Issue) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel13(l, v)
 }
-func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel14(in *jlexer.Lexer, out *Comments) {
+func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel14(in *jlexer.Lexer, out *CommentsRest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -1132,21 +1181,21 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel14(in *jlexer.Le
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(Comments, 0, 8)
+				*out = make(CommentsRest, 0, 8)
 			} else {
-				*out = Comments{}
+				*out = CommentsRest{}
 			}
 		} else {
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v22 *Comment
+			var v22 *CommentRest
 			if in.IsNull() {
 				in.Skip()
 				v22 = nil
 			} else {
 				if v22 == nil {
-					v22 = new(Comment)
+					v22 = new(CommentRest)
 				}
 				(*v22).UnmarshalEasyJSON(in)
 			}
@@ -1159,7 +1208,7 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel14(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel14(out *jwriter.Writer, in Comments) {
+func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel14(out *jwriter.Writer, in CommentsRest) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -1179,29 +1228,107 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel14(out *jwriter.
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v Comments) MarshalJSON() ([]byte, error) {
+func (v CommentsRest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel14(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Comments) MarshalEasyJSON(w *jwriter.Writer) {
+func (v CommentsRest) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel14(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *Comments) UnmarshalJSON(data []byte) error {
+func (v *CommentsRest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel14(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Comments) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *CommentsRest) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel14(l, v)
 }
-func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(in *jlexer.Lexer, out *Comment) {
+func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(in *jlexer.Lexer, out *Comments) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(Comments, 0, 8)
+			} else {
+				*out = Comments{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v25 *Comment
+			if in.IsNull() {
+				in.Skip()
+				v25 = nil
+			} else {
+				if v25 == nil {
+					v25 = new(Comment)
+				}
+				(*v25).UnmarshalEasyJSON(in)
+			}
+			*out = append(*out, v25)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(out *jwriter.Writer, in Comments) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v26, v27 := range in {
+			if v26 > 0 {
+				out.RawByte(',')
+			}
+			if v27 == nil {
+				out.RawString("null")
+			} else {
+				(*v27).MarshalEasyJSON(out)
+			}
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Comments) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Comments) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Comments) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Comments) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(l, v)
+}
+func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(in *jlexer.Lexer, out *CommentRest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1224,10 +1351,12 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(in *jlexer.Le
 			out.Id = int(in.Int())
 		case "text":
 			out.Text = string(in.String())
-		case "attachmentPath":
-			out.AttachmentPath = string(in.String())
-		case "authorId":
-			out.AuthorId = int(in.Int())
+		case "author":
+			(out.Author).UnmarshalEasyJSON(in)
+		case "date":
+			out.Date = int64(in.Int64())
+		case "issueId":
+			out.IssueId = int(in.Int())
 		default:
 			in.SkipRecursive()
 		}
@@ -1238,7 +1367,7 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(out *jwriter.Writer, in Comment) {
+func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel16(out *jwriter.Writer, in CommentRest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1253,14 +1382,113 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(out *jwriter.
 		out.String(string(in.Text))
 	}
 	{
-		const prefix string = ",\"attachmentPath\":"
+		const prefix string = ",\"author\":"
 		out.RawString(prefix)
-		out.String(string(in.AttachmentPath))
+		(in.Author).MarshalEasyJSON(out)
+	}
+	{
+		const prefix string = ",\"date\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.Date))
+	}
+	{
+		const prefix string = ",\"issueId\":"
+		out.RawString(prefix)
+		out.Int(int(in.IssueId))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v CommentRest) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel16(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v CommentRest) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel16(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *CommentRest) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *CommentRest) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(l, v)
+}
+func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel17(in *jlexer.Lexer, out *Comment) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "commentId":
+			out.Id = int(in.Int())
+		case "text":
+			out.Text = string(in.String())
+		case "authorId":
+			out.AuthorId = int(in.Int())
+		case "issueId":
+			out.IssueId = int(in.Int())
+		case "date":
+			out.Date = int64(in.Int64())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel17(out *jwriter.Writer, in Comment) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"commentId\":"
+		out.RawString(prefix[1:])
+		out.Int(int(in.Id))
+	}
+	{
+		const prefix string = ",\"text\":"
+		out.RawString(prefix)
+		out.String(string(in.Text))
 	}
 	{
 		const prefix string = ",\"authorId\":"
 		out.RawString(prefix)
 		out.Int(int(in.AuthorId))
+	}
+	{
+		const prefix string = ",\"issueId\":"
+		out.RawString(prefix)
+		out.Int(int(in.IssueId))
+	}
+	{
+		const prefix string = ",\"date\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.Date))
 	}
 	out.RawByte('}')
 }
@@ -1268,27 +1496,27 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v Comment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(&w, v)
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel17(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Comment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel15(w, v)
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel17(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Comment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(&r, v)
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel17(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Comment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel15(l, v)
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel17(l, v)
 }
-func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(in *jlexer.Lexer, out *Attachments) {
+func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel18(in *jlexer.Lexer, out *Attachments) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -1305,17 +1533,17 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(in *jlexer.Le
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v25 *Attachment
+			var v28 *Attachment
 			if in.IsNull() {
 				in.Skip()
-				v25 = nil
+				v28 = nil
 			} else {
-				if v25 == nil {
-					v25 = new(Attachment)
+				if v28 == nil {
+					v28 = new(Attachment)
 				}
-				(*v25).UnmarshalEasyJSON(in)
+				(*v28).UnmarshalEasyJSON(in)
 			}
-			*out = append(*out, v25)
+			*out = append(*out, v28)
 			in.WantComma()
 		}
 		in.Delim(']')
@@ -1324,19 +1552,19 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel16(out *jwriter.Writer, in Attachments) {
+func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel18(out *jwriter.Writer, in Attachments) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
 		out.RawByte('[')
-		for v26, v27 := range in {
-			if v26 > 0 {
+		for v29, v30 := range in {
+			if v29 > 0 {
 				out.RawByte(',')
 			}
-			if v27 == nil {
+			if v30 == nil {
 				out.RawString("null")
 			} else {
-				(*v27).MarshalEasyJSON(out)
+				(*v30).MarshalEasyJSON(out)
 			}
 		}
 		out.RawByte(']')
@@ -1346,27 +1574,27 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel16(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v Attachments) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel16(&w, v)
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel18(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Attachments) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel16(w, v)
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel18(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Attachments) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(&r, v)
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel18(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Attachments) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel16(l, v)
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel18(l, v)
 }
-func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel17(in *jlexer.Lexer, out *Attachment) {
+func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel19(in *jlexer.Lexer, out *Attachment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1401,7 +1629,7 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel17(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel17(out *jwriter.Writer, in Attachment) {
+func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel19(out *jwriter.Writer, in Attachment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1426,23 +1654,23 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel17(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v Attachment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel17(&w, v)
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel19(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Attachment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel17(w, v)
+	easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel19(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Attachment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel17(&r, v)
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel19(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Attachment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel17(l, v)
+	easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel19(l, v)
 }
