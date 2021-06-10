@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 func GetAllIssues(ctx echo.Context) error {
@@ -49,14 +48,12 @@ func GetIssue(ctx echo.Context) error {
 func AddIssue(ctx echo.Context) error {
 	projectId := ctx.Param("id")
 	issueJson := ctx.QueryParam("issue")
-	statusId, _ := strconv.Atoi(ctx.QueryParam("statusId"))
 	log.Printf("%s %s", projectId, issueJson)
 	issue := &model.Issue{}
 	if err := issue.UnmarshalJSON([]byte(issueJson)); err != nil {
 		return ctx.String(http.StatusNotImplemented, err.Error())
 	}
 	log.Printf("Status id %d", issue.StatusId)
-	issue.StatusId = statusId
 	log.Println(issue)
 	if err := insertIssue(issue, projectId); err != nil {
 		return ctx.String(http.StatusNotImplemented, err.Error())
