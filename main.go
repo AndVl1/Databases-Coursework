@@ -32,6 +32,7 @@ func main() {
 	e.GET("/issues/:assignee", controller.GetIssuesForAssignee)
 	e.GET("/projects/:id/issues", controller.GetIssuesForProject)
 	e.GET("/issues/:id/comments", controller.GetComments)
+	e.GET("/projects/:id/users", controller.GetUsersForProject)
 	// POST
 	e.POST("/login", controller.LoginUser)
 	e.POST("/check", controller.CheckUser)
@@ -39,6 +40,7 @@ func main() {
 	e.POST("/projects/add", controller.AddProject)
 	e.POST("/projects/:id/issues/add", controller.AddIssue)
 	e.POST("/issues/:id/comments/add", controller.AddComment)
+	e.POST("/issues/:id/update", controller.UpdateIssue)
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {

@@ -71,8 +71,9 @@ func getProjectsForUserRepo(userId string) (model.Projects, error) {
 		return nil, err
 	}
 	defer conn.Release()
-	rows, _ := conn.Query(context.Background(), "SELECT projectId, projectName, projectDescription, issueCount "+
-		"FROM ProjectUsersView WHERE userId=$1", userId)
+	rows, _ := conn.Query(context.Background(),
+		"SELECT projectId, projectName, projectDescription, issuesCount "+
+			"FROM ProjectUsersView WHERE userId=$1", userId)
 
 	for rows.Next() {
 		var project model.Project

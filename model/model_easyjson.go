@@ -1059,7 +1059,9 @@ func easyjsonC80ae7adDecodeGithubComAndVl1BugTrackerBackendModel13(in *jlexer.Le
 		case "authorId":
 			out.AuthorId = int(in.Int())
 		case "assigneeId":
-			out.AssigneeId = int(in.Int())
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.AssigneeId).UnmarshalJSON(data))
+			}
 		case "releaseVersion":
 			out.ReleaseVersion = string(in.String())
 		case "creationDate":
@@ -1114,7 +1116,7 @@ func easyjsonC80ae7adEncodeGithubComAndVl1BugTrackerBackendModel13(out *jwriter.
 	{
 		const prefix string = ",\"assigneeId\":"
 		out.RawString(prefix)
-		out.Int(int(in.AssigneeId))
+		out.Raw((in.AssigneeId).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"releaseVersion\":"

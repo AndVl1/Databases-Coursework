@@ -22,8 +22,15 @@ func AddComment(ctx echo.Context) error {
 		IssueId:  issueId,
 		Date:     date,
 	}
-	comment.Id, _ = addCommentRepo(comment)
-	commentJson, _ := comment.MarshalJSON()
+	var err error
+	comment.Id, err = addCommentRepo(comment)
+	if err != nil {
+		return ctx.String(http.StatusNotImplemented, err.Error())
+	}
+	commentJson, err := comment.MarshalJSON()
+	if err != nil {
+		return ctx.String(http.StatusNotImplemented, err.Error())
+	}
 	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, commentJson)
 }
 
@@ -45,7 +52,7 @@ func getCommentsRepo(issueId string) (model.CommentsRest, error) {
 	defer conn.Release()
 	rows, _ := conn.Query(context.Background(),
 		"SELECT commentId, commentText, commentDate, issueId, userId, name, login "+
-			"FROM CommentView WHERE issueId=$1", issueId)
+			"FROM CommentView WHERE issueId=$1 ORDER BY commentId", issueId)
 	for rows.Next() {
 		var comment model.CommentRest
 		_ = rows.Scan(&comment.Id, &comment.Text, &comment.Date,

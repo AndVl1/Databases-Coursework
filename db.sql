@@ -22,7 +22,7 @@ CREATE TABLE Project
     projectId           serial  NOT NULL ,
     projectName         text    NOT NULL ,
     projectDescription  text    NULL ,
-    issueCount          int     NOT NULL DEFAULT 0 ,
+    issuesCount         int     NOT NULL DEFAULT 0 ,
     CONSTRAINT pk_Project PRIMARY KEY (projectId)
 );
 
@@ -37,7 +37,8 @@ CREATE TABLE ProjectUser
 );
 
 CREATE VIEW ProjectUsersView AS
-    SELECT U.userId, P.projectId, P.projectName, P.projectDescription, P.issueCount FROM "User" as U
+    SELECT U.userId, U.login, U.name, P.projectId,
+           P.projectName, P.projectDescription, P.issuesCount FROM "User" as U
         LEFT JOIN ProjectUser PU on U.userId = PU.userId
         LEFT JOIN Project P on PU.projectId = P.projectId;
 
@@ -123,8 +124,8 @@ CREATE TABLE Attachment
 CREATE TABLE Comment
 (
     commentId   serial  NOT NULL ,
-    commentText serial  NOT NULL ,
-    commentDate serial  NOT NULL ,
+    commentText text    NOT NULL ,
+    commentDate bigint  NOT NULL ,
     authorId    int     NOT NULL ,
     issueId     int     NOT NULL ,
     CONSTRAINT fk_Issue     FOREIGN KEY (issueId)   REFERENCES Issue(issueId),
