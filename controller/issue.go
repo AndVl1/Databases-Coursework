@@ -144,7 +144,7 @@ func insertIssue(issue *model.Issue, projectId string) error {
 			return err
 		}
 		row, err = conn.Query(context.Background(),
-			"UPDATE Project SET issuesCount=$1 WHERE projectId=$2",
+			"UPDATE Project SET issuesCount=$1 WHERE projectId=$2 RETURNING issuesCount",
 			issuesCount,
 			projectId)
 		if err != nil {
@@ -156,7 +156,7 @@ func insertIssue(issue *model.Issue, projectId string) error {
 			"INSERT INTO Issue ("+
 				"name, description, statusId, authorId, projectIssueNumber, "+
 				"labelId, releaseVersion, creationDate, deadline,"+
-				"projectId, assigneeId"+
+				"projectId"+
 				") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING issueId",
 			issue.Name, issue.Description, issue.StatusId, issue.AuthorId,
 			issuesCount, issue.LabelId, issue.ReleaseVersion, issue.CreationDate,
@@ -169,7 +169,7 @@ func insertIssue(issue *model.Issue, projectId string) error {
 			return err
 		}
 		row, err = conn.Query(context.Background(),
-			"UPDATE Project SET issuesCount=$1 WHERE projectId=$2",
+			"UPDATE Project SET issuesCount=$1 WHERE projectId=$2 RETURNING issuesCount",
 			issuesCount,
 			projectId)
 		if err != nil {

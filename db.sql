@@ -17,6 +17,8 @@ CREATE TABLE "User"
     UNIQUE (name)
 );
 
+INSERT INTO "User" (userId, login, password, name) VALUES (-2, '', '', 'DELETED');
+
 CREATE TABLE Project
 (
     projectId           serial  NOT NULL ,
@@ -31,9 +33,10 @@ CREATE TABLE ProjectUser
     userId      int NOT NULL,
     projectId   int NOT NULL,
     CONSTRAINT  pk_ProjectUser  PRIMARY KEY (userId, projectId),
-    CONSTRAINT  fk_Project      FOREIGN KEY (projectId) REFERENCES Project (projectId),
+    CONSTRAINT  fk_Project      FOREIGN KEY (projectId) REFERENCES Project (projectId)
+        ON UPDATE CASCADE ON DELETE CASCADE ,
     CONSTRAINT  fk_User         FOREIGN KEY (userId)    REFERENCES "User" (userId)
-
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE VIEW ProjectUsersView AS
@@ -43,8 +46,6 @@ CREATE VIEW ProjectUsersView AS
         LEFT JOIN Project P on PU.projectId = P.projectId;
 
 SELECT projectId, projectName, projectDescription FROM ProjectUsersView;
-
--- CREATE INDEX IX_ProjectUser ON ProjectUsersView(userId);
 
 CREATE TABLE Status
 (
@@ -78,7 +79,6 @@ CREATE TABLE Issue
     name                text        NOT NULL,
     projectIssueNumber  int         NOT NULL,
     description         text        NOT NULL,
-    releaseVersion      text        NOT NULL,
     creationDate        bigint      NOT NULL,
     deadline            bigint      NULL DEFAULT NULL,
     assigneeId          int         NULL DEFAULT NULL,
@@ -88,37 +88,14 @@ CREATE TABLE Issue
     -- in 'new', 'in progress', 'review', 'testing', 'ready', 'closed'
     labelId             int         NOT NULL,
     CONSTRAINT pk_Bug       PRIMARY KEY (issueId),
-    CONSTRAINT fk_Project   FOREIGN KEY (projectId)     REFERENCES Project (projectId),
-    CONSTRAINT fk_Author    FOREIGN KEY (authorId)      REFERENCES "User" (userId),
-    CONSTRAINT fk_Developer FOREIGN KEY (assigneeId)    REFERENCES "User" (userId),
+    CONSTRAINT fk_Project   FOREIGN KEY (projectId)     REFERENCES Project (projectId) ON DELETE CASCADE ,
+    CONSTRAINT fk_Author    FOREIGN KEY (authorId)      REFERENCES "User" (userId) ON DELETE RESTRICT ,
+    CONSTRAINT fk_Developer FOREIGN KEY (assigneeId)    REFERENCES "User" (userId) ON DELETE SET NULL ,
     -- wanted to constraint them to ProjectUser, but is didn't work
     -- "there is no unique constraint matching given keys for referenced table "projectuser""
     -- in ProjectUser must be unique combination, but not unique fields
-    CONSTRAINT fk_Status    FOREIGN KEY (statusId)      REFERENCES Status (statusId),
-    CONSTRAINT fk_Label     FOREIGN KEY (labelId)       REFERENCES Label (labelId)
-);
-
-CREATE TABLE IssueRecursive
-(
-    issueId         int     NOT NULL ,
-    containsIssueId int     NOT NULL ,
-    CONSTRAINT pk_IssueRecursive    PRIMARY KEY (issueId, containsIssueId),
-    CONSTRAINT fk_Issue     FOREIGN KEY (issueId)           REFERENCES Issue(issueId),
-    CONSTRAINT fk_IssueRec  FOREIGN KEY (containsIssueId)   REFERENCES Issue(issueId)
-);
-
-CREATE TABLE Attachment
-(
-    attachmentId    serial  NOT NULL ,
-    fileName        text    NOT NULL ,
-    fileType        text    NOT NULL ,
-    postDate        date    NOT NULL ,
-    attachmentPath  text    NOT NULL ,
-    issueId         int     NOT NULL ,
-    authorId        int     NOT NULL ,
-    CONSTRAINT pk_Attachment    PRIMARY KEY (attachmentId),
-    CONSTRAINT fk_Issue     FOREIGN KEY (issueId)   REFERENCES Issue(issueId),
-    CONSTRAINT fk_User      FOREIGN KEY (authorId)  REFERENCES "User"(userId)
+    CONSTRAINT fk_Status    FOREIGN KEY (statusId)      REFERENCES Status (statusId) ON DELETE RESTRICT,
+    CONSTRAINT fk_Label     FOREIGN KEY (labelId)       REFERENCES Label (labelId) ON DELETE RESTRICT
 );
 
 CREATE TABLE Comment
@@ -128,8 +105,9 @@ CREATE TABLE Comment
     commentDate bigint  NOT NULL ,
     authorId    int     NOT NULL ,
     issueId     int     NOT NULL ,
-    CONSTRAINT fk_Issue     FOREIGN KEY (issueId)   REFERENCES Issue(issueId),
-    CONSTRAINT fk_User      FOREIGN KEY (authorId)  REFERENCES "User"(userId)
+    CONSTRAINT fk_Issue     FOREIGN KEY (issueId)   REFERENCES Issue(issueId) ON DELETE CASCADE ,
+    CONSTRAINT fk_User      FOREIGN KEY (authorId)  REFERENCES "User"(userId) ON DELETE CASCADE
+-- User можно сделать SET NULL, но заморачиваться не особо хочется, лучше просто всё удалить
 );
 
 CREATE VIEW CommentView AS
