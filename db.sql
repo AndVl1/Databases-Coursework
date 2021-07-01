@@ -17,8 +17,6 @@ CREATE TABLE "User"
     UNIQUE (name)
 );
 
-INSERT INTO "User" (userId, login, password, name) VALUES (-2, '', '', 'DELETED');
-
 CREATE TABLE Project
 (
     projectId           serial  NOT NULL ,
@@ -44,8 +42,6 @@ CREATE VIEW ProjectUsersView AS
            P.projectName, P.projectDescription, P.issuesCount FROM "User" as U
         LEFT JOIN ProjectUser PU on U.userId = PU.userId
         LEFT JOIN Project P on PU.projectId = P.projectId;
-
-SELECT projectId, projectName, projectDescription FROM ProjectUsersView;
 
 CREATE TABLE Status
 (
@@ -84,6 +80,7 @@ CREATE TABLE Issue
     assigneeId          int         NULL DEFAULT NULL,
     authorId            int         NOT NULL,
     projectId           int         NOT NULL,
+    releaseVersion      text        NOT NULL,
     statusId            int         NOT NULL,
     -- in 'new', 'in progress', 'review', 'testing', 'ready', 'closed'
     labelId             int         NOT NULL,

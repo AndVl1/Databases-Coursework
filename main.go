@@ -42,6 +42,8 @@ func main() {
 	e.POST("/issues/:id/comments/add", controller.AddComment)
 	e.POST("/issues/:id/update", controller.UpdateIssue)
 
+	e.POST("/projects/:id/adduser", controller.AddUserToProject)
+
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		log.Fatal(err)

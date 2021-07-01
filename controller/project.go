@@ -33,6 +33,35 @@ func AddProject(ctx echo.Context) error {
 	return ctx.Blob(http.StatusOK, echo.MIMEApplicationJSON, userJson)
 }
 
+func AddUserToProject(ctx echo.Context) error {
+	projectId := ctx.Param("id")
+	userId := ctx.QueryParam("userid")
+	if err := addUserToProject(userId, projectId); err != nil {
+		return ctx.String(http.StatusBadRequest, "")
+	}
+	return ctx.String(http.StatusOK, "")
+}
+
+func addUserToProject(userId string, projectId string) error {
+	pool := storage.GetDBInstance()
+	conn, err := pool.Acquire(context.Background())
+	if err != nil {
+		log.Printf("Unable to acquire a database connection: %v\n", err)
+		return err
+	}
+	defer conn.Release()
+	row := conn.QueryRow(
+		context.Background(), "INSERT INTO ProjectUser (userId, projectId) VALUES ($1, $2) RETURNING userId",
+		userId, projectId)
+	id := 1
+	err = row.Scan(&id)
+	if err != nil {
+		log.Printf("Unable to INSERT: %v\n", err)
+		return err
+	}
+	return nil
+}
+
 func insertProject(userId string, project *model.Project) (uint64, error) {
 	pool := storage.GetDBInstance()
 	conn, err := pool.Acquire(context.Background())
@@ -47,7 +76,7 @@ func insertProject(userId string, project *model.Project) (uint64, error) {
 		project.ProjectName, project.ProjectDescription)
 	err = projectRow.Scan(&project.Id)
 	if err != nil {
-		log.Printf("Unable to INSERT: %v\n", err)
+		log.Printf("AUnable to INSERT: %v\n", err)
 		return 0, err
 	}
 	_, err = conn.Query(
